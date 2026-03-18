@@ -49,8 +49,8 @@ async function handleCapture(tabId, scale) {
 
   const tab = await chrome.tabs.get(tabId);
   const domain = new URL(tab.url).hostname.replace(/^www\./, '').replace(/\./g, '_');
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `webgrab-${domain}-${outputWidth}x${outputHeight}-${timestamp}.png`;
+  const date = new Date().toISOString().slice(0, 10);
+  const filename = `webgrab-${domain}-${outputWidth}x${outputHeight}-${date}.png`;
 
   await chrome.downloads.download({
     url: dataUrl,
