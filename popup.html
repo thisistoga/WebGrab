@@ -43,10 +43,38 @@
     #status.error {
       color: #dc2626;
     }
+    .resolution-toggle {
+      display: flex;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .resolution-toggle label {
+      flex: 1;
+      text-align: center;
+      padding: 6px 0;
+      font-size: 13px;
+      cursor: pointer;
+      background: #f8fafc;
+      color: #475569;
+      transition: background 0.15s, color 0.15s;
+    }
+    .resolution-toggle input { display: none; }
+    .resolution-toggle input:checked + label {
+      background: #2563eb;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
   <h1>WebGrab</h1>
+  <div class="resolution-toggle">
+    <input type="radio" name="scale" id="scale1x" value="1">
+    <label for="scale1x">1x</label>
+    <input type="radio" name="scale" id="scale2x" value="2" checked>
+    <label for="scale2x">2x</label>
+  </div>
   <button id="capture">Capture Screenshot</button>
   <div id="status"></div>
   <script src="popup.js"></script>

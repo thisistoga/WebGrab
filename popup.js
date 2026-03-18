@@ -10,7 +10,8 @@ captureBtn.addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) throw new Error('No active tab found');
 
-    const response = await chrome.runtime.sendMessage({ action: 'captureScreenshot', tabId: tab.id });
+    const scale = parseInt(document.querySelector('input[name="scale"]:checked').value, 10);
+    const response = await chrome.runtime.sendMessage({ action: 'captureScreenshot', tabId: tab.id, scale });
 
     if (response && response.success) {
       status.textContent = 'Screenshot saved!';
