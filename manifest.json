@@ -5,7 +5,8 @@
   "description": "Capture high-resolution screenshots of web pages at their exact page size.",
   "permissions": [
     "activeTab",
-    "downloads"
+    "downloads",
+    "offscreen"
   ],
   "action": {
     "default_popup": "popup.html",

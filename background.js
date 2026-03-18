@@ -3,7 +3,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     handleCapture(message.tabId, message.scale)
       .then(result => sendResponse(result))
       .catch(err => sendResponse({ success: false, error: err.message }));
-    return true; // keep message channel open for async response
+    return true;
+  }
+  if (message.action === 'downscaleResult') {
+    // Received from offscreen document
+    return false;
   }
 });
 
@@ -19,25 +23,27 @@ async function handleCapture(tabId, scale) {
   const bitmap = await createImageBitmap(blob);
   const capturedWidth = bitmap.width;
   const capturedHeight = bitmap.height;
+  bitmap.close();
 
   let outputWidth, outputHeight;
 
   if (scale === 1) {
-    // Native capture is at 2x on retina — halve it for 1x
     outputWidth = Math.round(capturedWidth / 2);
     outputHeight = Math.round(capturedHeight / 2);
 
-    const canvas = new OffscreenCanvas(outputWidth, outputHeight);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0, outputWidth, outputHeight);
-    bitmap.close();
-
-    const outBlob = await canvas.convertToBlob({ type: 'image/png' });
-    dataUrl = await blobToDataUrl(outBlob);
+    // Use offscreen document for reliable canvas operations
+    await ensureOffscreenDocument();
+    const scaledDataUrl = await chrome.runtime.sendMessage({
+      action: 'downscale',
+      dataUrl,
+      targetWidth: outputWidth,
+      targetHeight: outputHeight
+    });
+    dataUrl = scaledDataUrl;
+    await chrome.offscreen.closeDocument();
   } else {
     outputWidth = capturedWidth;
     outputHeight = capturedHeight;
-    bitmap.close();
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -52,10 +58,15 @@ async function handleCapture(tabId, scale) {
   return { success: true };
 }
 
-function blobToDataUrl(blob) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
+async function ensureOffscreenDocument() {
+  const contexts = await chrome.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT']
   });
+  if (contexts.length === 0) {
+    await chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: ['CANVAS'],
+      justification: 'Downscale screenshot to 1x resolution'
+    });
+  }
 }
