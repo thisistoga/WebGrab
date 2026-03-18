@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WebGrab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Capture high-resolution screenshots of web pages at their exact page size.",
   "permissions": [
     "activeTab",
