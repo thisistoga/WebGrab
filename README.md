@@ -52,7 +52,3 @@ WebGrab/
 ├── offscreen.js        # Image downscaling logic
 └── icons/              # Extension icons (16, 48, 128)
 ```
-
-## License
-
-MIT
