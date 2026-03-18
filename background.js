@@ -65,7 +65,7 @@ async function ensureOffscreenDocument() {
   if (contexts.length === 0) {
     await chrome.offscreen.createDocument({
       url: 'offscreen.html',
-      reasons: ['CANVAS'],
+      reasons: ['BLOBS'],
       justification: 'Downscale screenshot to 1x resolution'
     });
   }
