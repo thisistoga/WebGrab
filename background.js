@@ -30,21 +30,22 @@ async function handleCapture(tabId, scale) {
   if (scale === 1) {
     outputWidth = Math.round(capturedWidth / 2);
     outputHeight = Math.round(capturedHeight / 2);
-
-    // Use offscreen document for reliable canvas operations
-    await ensureOffscreenDocument();
-    const scaledDataUrl = await chrome.runtime.sendMessage({
-      action: 'downscale',
-      dataUrl,
-      targetWidth: outputWidth,
-      targetHeight: outputHeight
-    });
-    dataUrl = scaledDataUrl;
-    await chrome.offscreen.closeDocument();
   } else {
     outputWidth = capturedWidth;
     outputHeight = capturedHeight;
   }
+
+  // Always pass through canvas to normalize color space (fixes
+  // desaturated colors on wide-gamut displays for raw captures)
+  await ensureOffscreenDocument();
+  const normalizedDataUrl = await chrome.runtime.sendMessage({
+    action: 'downscale',
+    dataUrl,
+    targetWidth: outputWidth,
+    targetHeight: outputHeight
+  });
+  dataUrl = normalizedDataUrl;
+  await chrome.offscreen.closeDocument();
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `webgrab-${outputWidth}x${outputHeight}-${timestamp}.png`;
